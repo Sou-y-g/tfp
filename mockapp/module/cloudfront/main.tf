@@ -2,6 +2,8 @@ resource "aws_cloudfront_distribution" "static" {
   origin {
     domain_name = var.domain_name
     origin_id   = var.origin_id
+    #OACの設定
+    origin_access_control_id = aws_cloudfront_origin_access_control.static.id
   }
 
   enabled             = true
@@ -33,6 +35,14 @@ resource "aws_cloudfront_distribution" "static" {
 
   #cache policyを作成したのちディストリビューション作成
   depends_on = [aws_cloudfront_cache_policy.static_cache_policy]
+}
+
+#OACの設定
+resource "aws_cloudfront_origin_access_control" "static" {
+  name = "${var.tag}-static-cf-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior = "always"
+  signing_protocol = "sigv4"
 }
 
 #cache policy

@@ -16,10 +16,10 @@ resource "aws_s3_bucket_ownership_controls" "webhost" {
 #パブリックブロックアクセス無効(有効の場合はtrue)
 resource "aws_s3_bucket_public_access_block" "webhost" {
   bucket = aws_s3_bucket.webhost.id
-  block_public_acls = false
-  block_public_policy = false
-  ignore_public_acls = false
-  restrict_public_buckets = false
+  block_public_acls = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
 }
 
 #バージョニング 無効
@@ -50,15 +50,17 @@ resource "aws_s3_bucket_policy" "webhost" {
 data "aws_iam_policy_document" "webhost" {
   statement {
     principals {
-      type = "AWS"
-      identifiers = ["*"]
+      type = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
-    actions = [
-      "s3:GetObject",
-    ]
-    resources = [
-      "${aws_s3_bucket.webhost.arn}/*",
-    ]
+    actions = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.webhost.arn}/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [var.cf_distribution_arn]
+    }
+
   }
 }
 

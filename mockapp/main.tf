@@ -2,6 +2,7 @@ module "s3" {
   source = "./module/s3"
 
   tag = var.tag
+  cf_distribution_arn = module.cloudfront.cf_distribution_arn
 }
 
 module "cloudfront" {
