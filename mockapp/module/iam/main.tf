@@ -1,47 +1,41 @@
-#認証用ロール
-resource "aws_iam_role" "auth_user_role" {
-  name = "${var.tag}_auth_user_role"
-  assume_role_policy = data.aws_iam_policy_document.auth_user_assume_role.json
+#lambda用のロール作成
+resource "aws_iam_role" "hello_lambda_role" {
+  name               = "hello_lambda_role"
+  assume_role_policy = data.aws_iam_policy_document.hello_lambda_policy.json
 }
 
-data "aws_iam_policy_document" "auth_user_assume_role" {
+#assumerole
+data "aws_iam_policy_document" "hello_lambda_policy" {
   statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Federated"
-      identifiers = ["cognito-identity.amazonaws.com"]
-    }
-
-    condition {
-      test     = "ForAnyValue:StringLike"
-      variable = "cognito-identity.amazonaws.com:amr"
-      values   = ["authenticated"]
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
     }
   }
 }
 
-#未認証用ロール
-resource "aws_iam_role" "unauth_user_role" {
-  name = "${var.tag}_unauth_user_role"
-  assume_role_policy = data.aws_iam_policy_document.unauth_user_assume_role.json
+#CloudWatch logsにログを収集するためのポリシー
+resource "aws_iam_policy" "log_lambda_policy" {
+  name   = "log_lambda_policy"
+  policy = data.aws_iam_policy_document.log_lambda_policy.json
 }
 
-data "aws_iam_policy_document" "unauth_user_assume_role" {
+data "aws_iam_policy_document" "log_lambda_policy" {
   statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
 
-    principals {
-      type        = "Federated"
-      identifiers = ["cognito-identity.amazonaws.com"]
-    }
-
-    condition {
-      test     = "ForAnyValue:StringLike"
-      variable = "cognito-identity.amazonaws.com:amr"
-      values   = ["unauthenticated"]
-    }
+    resources = ["arn:aws:logs:*:*:*"]
   }
+}
+
+#ポリシーのアタッチ
+resource "aws_iam_role_policy_attachment" "hello_lambda_role" {
+  policy_arn = aws_iam_policy.log_lambda_policy.arn
+  role       = aws_iam_role.hello_lambda_role.name
 }

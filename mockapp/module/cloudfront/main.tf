@@ -1,11 +1,14 @@
+#cloudfrontのディストリビューション作成
 resource "aws_cloudfront_distribution" "static" {
   origin {
-    domain_name = var.domain_name
+    domain_name = var.s3_domain_name
     origin_id   = var.origin_id
     #OACの設定
     origin_access_control_id = aws_cloudfront_origin_access_control.static.id
   }
 
+  #カスタムドメイン名
+  aliases             = [var.domain_name]
   enabled             = true
   default_root_object = "index.html"
 
@@ -15,7 +18,7 @@ resource "aws_cloudfront_distribution" "static" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = var.origin_id
     #cache_policyは別途設定
-    cache_policy_id = aws_cloudfront_cache_policy.static_cache_policy.id
+    cache_policy_id        = aws_cloudfront_cache_policy.static_cache_policy.id
     viewer_protocol_policy = "allow-all"
   }
 
@@ -29,8 +32,28 @@ resource "aws_cloudfront_distribution" "static" {
     }
   }
 
+  #acm設定
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = false
+    acm_certificate_arn            = var.acm_arn
+    ssl_support_method             = "sni-only"
+    minimum_protocol_version       = "TLSv1"
+  }
+
+  #errorページ(404)
+  custom_error_response {
+    error_caching_min_ttl = 30000
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/error.html"
+  }
+
+  #errorページ(403)
+  custom_error_response {
+    error_caching_min_ttl = 30000
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/error.html"
   }
 
   #cache policyを作成したのちディストリビューション作成
@@ -39,10 +62,10 @@ resource "aws_cloudfront_distribution" "static" {
 
 #OACの設定
 resource "aws_cloudfront_origin_access_control" "static" {
-  name = "${var.tag}-static-cf-oac"
+  name                              = "${var.tag}-static-cf-oac"
   origin_access_control_origin_type = "s3"
-  signing_behavior = "always"
-  signing_protocol = "sigv4"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 #cache policy
@@ -63,7 +86,7 @@ resource "aws_cloudfront_cache_policy" "static_cache_policy" {
     query_strings_config {
       query_string_behavior = "none"
     }
-    enable_accept_encoding_gzip = true
+    enable_accept_encoding_gzip   = true
     enable_accept_encoding_brotli = true
   }
 } 
