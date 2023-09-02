@@ -47,22 +47,32 @@ module "s3" {
   cf_distribution_arn = module.cloudfront.cf_distribution_arn
 }
 
-#module "apigateway" {
-#  source = "./module/apigateway"
-#
-#  tag                 = var.tag
-#  hello_lambda_arn = module.lambda.hello_lambda_arn
-#}
-#
-#module "lambda" {
-#  source = "./module/lambda"
-#
-#  hello_lambda_role = module.iam.hello_lambda_role
-#  tag    = var.tag
-#  function_file_name = var.function_file_name
-#  module_path = var.module_path
-#}
-#
-#module "iam" {
-#  source = "./module/iam"
-#}
+module "apigateway" {
+  source = "./module/apigateway"
+
+  tag                 = var.tag
+  hello_lambda_arn = module.lambda.hello_lambda_arn
+}
+
+module "lambda" {
+  source = "./module/lambda"
+
+  hello_lambda_role = module.iam.hello_lambda_role
+  api_arn = module.apigateway.api_arn
+  tag    = var.tag
+  function_file_name = var.function_file_name
+  module_path = var.module_path
+}
+
+module "iam" {
+  source = "./module/iam"
+
+  db_arn = module.dynamodb.db_arn
+  tag    = var.tag
+}
+
+module "dynamodb" {
+  source = "./module/dynamodb"
+
+  tag    = var.tag
+}

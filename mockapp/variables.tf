@@ -23,7 +23,7 @@ variable "domain_name" {
 variable "function_file_name" {
   description = "function file name"
   type = string
-  default = "lambda_function"
+  default = "hello"
 }
 
 variable "module_path" {

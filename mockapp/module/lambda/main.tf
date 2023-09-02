@@ -17,3 +17,12 @@ resource "aws_lambda_function" "hello_world" {
   handler = "hello.lambda_handler"
   runtime = "python3.10"
 }
+
+#Lambdaのリソースベースポリシー API Gateway => Lambda
+resource "aws_lambda_permission" "lambda_permission" {
+  statement_id  = "Allow_APIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.hello_world.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn = "${var.api_arn}/*"
+}
