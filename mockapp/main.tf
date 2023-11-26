@@ -34,8 +34,9 @@ module "cloudfront" {
   source = "./module/cloudfront"
 
   s3_domain_name = module.s3.s3_domain_name
-  origin_id      = module.s3.origin_id
+  s3_origin_id      = module.s3.s3_origin_id
   acm_arn        = module.route53.acm_arn
+  hello_lambda_arn = module.lambda.hello_lambda_arn
   tag            = var.tag
   domain_name    = var.domain_name
 }

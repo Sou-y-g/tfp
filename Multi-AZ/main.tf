@@ -31,18 +31,18 @@ module "network" {
   all_cidr      = var.all
 }
 
-module "route53" {
-  source = "./module/route53"
-
-  cf_dns_name = module.cloudfront.cf_dns_name
-  cf_zone_id  = module.cloudfront.cf_zone_id
-  tag         = var.tag
-  domain_name = var.domain_name
-
-  providers = {
-    aws = aws.us
-  }
-}
+#module "route53" {
+#  source = "./module/route53"
+#
+#  cf_dns_name = module.cloudfront.cf_dns_name
+#  cf_zone_id  = module.cloudfront.cf_zone_id
+#  tag         = var.tag
+#  domain_name = var.domain_name
+#
+#  providers = {
+#    aws = aws.us
+#  }
+#}
 
 module "alb" {
   source = "./module/alb"

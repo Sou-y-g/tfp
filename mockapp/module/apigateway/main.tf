@@ -5,8 +5,10 @@
 resource "aws_api_gateway_rest_api" "api" {
   name = "${var.tag}-api"
 
+  #公開タイプ
   endpoint_configuration {
-    types = ["REGIONAL"]
+    #types = ["REGIONAL"]
+    types = ["EDGE"]
   }
 }
 

@@ -14,7 +14,10 @@ data "aws_iam_policy_document" "hello_lambda_policy" {
 
     principals {
       type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
+      identifiers = [
+        "lambda.amazonaws.com",
+        "edgelambda.amazonaws.com",
+        ]
     }
   }
 }
@@ -31,9 +34,13 @@ data "aws_iam_policy_document" "log_lambda_policy" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
+      "lambda:InvokeFunction",
+      "lambda:GetFunction",
+      "lambda:EnableReplication",
+      "cloudfront:UpdateDistribution"
     ]
 
-    resources = ["arn:aws:logs:*:*:*"]
+    resources = ["*"]
   }
 }
 
